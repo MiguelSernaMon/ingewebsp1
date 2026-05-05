@@ -1,55 +1,48 @@
-const API_URL = "https://caso13.onrender.com/api";
+import {
+  mockLogin,
+  mockRegister,
+  mockLogout,
+  mockForgotPassword,
+  mockResetPassword,
+} from "./mock";
+import { apiFetch } from "./api";
 
-export const authService = {
-  async register(nombre, email, password) {
-    const res = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, email, password }),
-    });
-    if (!res.ok) throw new Error("Error en el registro");
-    return res.json();
-  },
+const USE_MOCK = true;
 
-  async login(email, password) {
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) throw new Error("Error en el login");
-    return res.json();
-  },
-
-  async logout(token) {
-    const res = await fetch(`${API_URL}/auth/logout`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}` 
+export const authService = USE_MOCK
+  ? {
+      register: mockRegister,
+      login: mockLogin,
+      logout: mockLogout,
+      forgotPassword: mockForgotPassword,
+      resetPassword: mockResetPassword,
+    }
+  : {
+      async register(nombre, email, password) {
+        return apiFetch("/auth/register", {
+          method: "POST",
+          body: JSON.stringify({ nombre, email, password }),
+        });
       },
-    });
-    if (!res.ok) throw new Error("Error en el logout");
-    return res.json();
-  },
-
-  async forgotPassword(email) {
-    const res = await fetch(`${API_URL}/auth/forgot-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    if (!res.ok) throw new Error("Error recuperando contraseña");
-    return res.json();
-  },
-
-  async resetPassword(token, nuevaPassword) {
-    const res = await fetch(`${API_URL}/auth/reset-password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, nuevaPassword }),
-    });
-    if (!res.ok) throw new Error("Error reseteando contraseña");
-    return res.json();
-  }
-};
+      async login(email, password) {
+        return apiFetch("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email, password }),
+        });
+      },
+      async logout() {
+        return apiFetch("/auth/logout", { method: "POST" });
+      },
+      async forgotPassword(email) {
+        return apiFetch("/auth/forgot-password", {
+          method: "POST",
+          body: JSON.stringify({ email }),
+        });
+      },
+      async resetPassword(token, nuevaPassword) {
+        return apiFetch("/auth/reset-password", {
+          method: "POST",
+          body: JSON.stringify({ token, nuevaPassword }),
+        });
+      },
+    };
