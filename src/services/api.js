@@ -17,7 +17,7 @@ export async function apiFetch(endpoint, options = {}) {
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
-    credentials: "same-origin",
+    credentials: "omit",
   });
 
   if (res.status === 401) {

@@ -8,7 +8,7 @@ import {
 } from "./mock";
 import { apiFetch } from "./api";
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export const householdService = USE_MOCK
   ? {
@@ -40,5 +40,11 @@ export const householdService = USE_MOCK
       },
       async getMembers(hogarId) {
         return apiFetch(`/households/${hogarId}/members`);
+      },
+      async getMine() {
+        return apiFetch("/households");
+      },
+      async getMyInvitations() {
+        return apiFetch("/households/invitations");
       },
     };

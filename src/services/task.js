@@ -8,7 +8,7 @@ import {
 } from "./mock";
 import { apiFetch } from "./api";
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export const taskService = USE_MOCK
   ? {
