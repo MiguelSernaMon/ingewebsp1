@@ -79,12 +79,20 @@ export default function HouseholdDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <h1 className="text-4xl font-black uppercase">Tareas</h1>
-            <Link
-              to={`/households/${hogarId}/tasks/new`}
-              className="bg-[#A3E635] text-black font-black text-lg py-2 px-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all uppercase"
-            >
-              + Nueva Tarea
-            </Link>
+            <div className="flex gap-2 flex-wrap">
+              <Link
+                to={`/households/${hogarId}/reports`}
+                className="bg-white text-black font-black text-lg py-2 px-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all uppercase"
+              >
+                📊 Reportes
+              </Link>
+              <Link
+                to={`/households/${hogarId}/tasks/new`}
+                className="bg-[#A3E635] text-black font-black text-lg py-2 px-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all uppercase"
+              >
+                + Nueva Tarea
+              </Link>
+            </div>
           </div>
 
           <div className="flex gap-2 flex-wrap">

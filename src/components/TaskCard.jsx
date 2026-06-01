@@ -13,6 +13,12 @@ const ESTADO_COLORS = {
   Completada: "bg-green-300",
 };
 
+const PRIORIDAD_LABELS = {
+  Alta: "🔴 Alta",
+  Media: "🟡 Media",
+  Baja: "🟢 Baja",
+};
+
 export default function TaskCard({ task, onStatusChange, onDelete, onEdit, showActions = true }) {
   const isOverdue =
     task.fechaLimite && new Date(task.fechaLimite) < new Date() && task.estado !== "Completada";
@@ -36,6 +42,11 @@ export default function TaskCard({ task, onStatusChange, onDelete, onEdit, showA
         {task.categoria && (
           <span className="bg-gray-100 border-2 border-black px-2 py-1 uppercase">
             {task.categoria}
+          </span>
+        )}
+        {task.prioridad && (
+          <span className="bg-gray-100 border-2 border-black px-2 py-1 uppercase">
+            {PRIORIDAD_LABELS[task.prioridad] || task.prioridad}
           </span>
         )}
         {task.fechaLimite && (

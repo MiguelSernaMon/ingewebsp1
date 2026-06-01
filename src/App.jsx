@@ -16,6 +16,7 @@ import HouseholdDetailPage from "./pages/HouseholdDetailPage";
 import TaskNewPage from "./pages/TaskNewPage";
 import TaskEditPage from "./pages/TaskEditPage";
 import TaskDetailPage from "./pages/TaskDetailPage";
+import ReportsPage from "./pages/ReportsPage";
 
 export default function App() {
   return (
@@ -100,6 +101,17 @@ export default function App() {
               <ProtectedRoute>
                 <Layout>
                   <TaskDetailPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/households/:hogarId/reports"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ReportsPage />
                 </Layout>
               </ProtectedRoute>
             }

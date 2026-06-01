@@ -248,6 +248,7 @@ export async function mockGetTasks(hogarId, filters = {}) {
     titulo: t.titulo,
     categoria: t.categoria,
     estado: t.estado,
+    prioridad: t.prioridad || null,
     fechaLimite: t.fechaLimite,
     asignadoANombre: t.asignadoAId ? getUserById(t.asignadoAId)?.nombre || null : null,
   }));
@@ -266,7 +267,9 @@ export async function mockGetTask(tareaId) {
     descripcion: t.descripcion,
     categoria: t.categoria,
     estado: t.estado,
+    prioridad: t.prioridad || null,
     fechaLimite: t.fechaLimite,
+    completadaAt: t.completadaAt || null,
     asignadoA: t.asignadoAId
       ? (() => {
           const u = getUserById(t.asignadoAId);
@@ -291,8 +294,10 @@ export async function mockCreateTask(hogarId, data) {
     descripcion: data.descripcion || '',
     categoria: data.categoria || '',
     estado: 'Pendiente',
+    prioridad: data.prioridad || null,
     fechaLimite: data.fechaLimite || null,
     asignadoAId: data.asignadoAId || null,
+    completadaAt: null,
     createdAt: nowISO(),
     updatedAt: nowISO(),
   };
@@ -305,7 +310,9 @@ export async function mockCreateTask(hogarId, data) {
     descripcion: tarea.descripcion,
     categoria: tarea.categoria,
     estado: tarea.estado,
+    prioridad: tarea.prioridad || null,
     fechaLimite: tarea.fechaLimite,
+    completadaAt: tarea.completadaAt || null,
     asignadoA: tarea.asignadoAId
       ? (() => {
           const u = getUserById(tarea.asignadoAId);
@@ -327,6 +334,7 @@ export async function mockUpdateTask(tareaId, data) {
   if (data.titulo !== undefined) t.titulo = data.titulo;
   if (data.descripcion !== undefined) t.descripcion = data.descripcion;
   if (data.categoria !== undefined) t.categoria = data.categoria;
+  if (data.prioridad !== undefined) t.prioridad = data.prioridad;
   if (data.fechaLimite !== undefined) t.fechaLimite = data.fechaLimite;
   if (data.asignadoAId !== undefined) t.asignadoAId = data.asignadoAId;
   t.updatedAt = nowISO();
@@ -339,7 +347,9 @@ export async function mockUpdateTask(tareaId, data) {
     descripcion: t.descripcion,
     categoria: t.categoria,
     estado: t.estado,
+    prioridad: t.prioridad || null,
     fechaLimite: t.fechaLimite,
+    completadaAt: t.completadaAt || null,
     asignadoA: t.asignadoAId
       ? (() => {
           const u = getUserById(t.asignadoAId);
@@ -372,6 +382,9 @@ export async function mockUpdateTaskStatus(tareaId, estado) {
   if (!validStatus.includes(estado)) throw new Error('Estado inválido');
 
   t.estado = estado;
+  if (estado === 'Completada') {
+    t.completadaAt = nowISO();
+  }
   t.updatedAt = nowISO();
   save(db);
 
@@ -382,7 +395,9 @@ export async function mockUpdateTaskStatus(tareaId, estado) {
     descripcion: t.descripcion,
     categoria: t.categoria,
     estado: t.estado,
+    prioridad: t.prioridad || null,
     fechaLimite: t.fechaLimite,
+    completadaAt: t.completadaAt || null,
     asignadoA: t.asignadoAId
       ? (() => {
           const u = getUserById(t.asignadoAId);
@@ -425,4 +440,113 @@ export async function mockGetMyInvitations() {
         nombreHogar: hogar?.nombre || i.nombreHogar,
       };
     });
+}
+
+// ----------- REPORTS -----------
+
+export async function mockGetDistributionReport(hogarId) {
+  await delay(500);
+  requireMembership(hogarId);
+  const db = load();
+
+  const memberships = db.memberships.filter((m) => m.hogarId === hogarId);
+  const tasks = db.tasks.filter((t) => t.hogarId === hogarId);
+
+  const miembros = [];
+
+  // Members with assigned tasks
+  for (const m of memberships) {
+    const user = getUserById(m.usuarioId);
+    const userTasks = tasks.filter((t) => t.asignadoAId === m.usuarioId);
+    miembros.push({
+      usuarioId: m.usuarioId,
+      nombre: user?.nombre || 'Desconocido',
+      total: userTasks.length,
+      pendientes: userTasks.filter((t) => t.estado === 'Pendiente').length,
+      enProgreso: userTasks.filter((t) => t.estado === 'En_progreso').length,
+      completadas: userTasks.filter((t) => t.estado === 'Completada').length,
+    });
+  }
+
+  // Unassigned tasks
+  const unassigned = tasks.filter((t) => !t.asignadoAId);
+  if (unassigned.length > 0) {
+    miembros.push({
+      usuarioId: 0,
+      nombre: 'Sin asignar',
+      total: unassigned.length,
+      pendientes: unassigned.filter((t) => t.estado === 'Pendiente').length,
+      enProgreso: unassigned.filter((t) => t.estado === 'En_progreso').length,
+      completadas: unassigned.filter((t) => t.estado === 'Completada').length,
+    });
+  }
+
+  // Members without any tasks still show
+  for (const m of memberships) {
+    if (!miembros.find((mb) => mb.usuarioId === m.usuarioId)) {
+      const user = getUserById(m.usuarioId);
+      miembros.push({
+        usuarioId: m.usuarioId,
+        nombre: user?.nombre || 'Desconocido',
+        total: 0,
+        pendientes: 0,
+        enProgreso: 0,
+        completadas: 0,
+      });
+    }
+  }
+
+  return { hogarId, miembros };
+}
+
+export async function mockGetCumplimientoReport(hogarId) {
+  await delay(500);
+  requireMembership(hogarId);
+  const db = load();
+
+  const memberships = db.memberships.filter((m) => m.hogarId === hogarId);
+  const tasks = db.tasks.filter((t) => t.hogarId === hogarId);
+
+  const usuarios = [];
+
+  for (const m of memberships) {
+    const user = getUserById(m.usuarioId);
+    const userTasks = tasks.filter((t) => t.asignadoAId === m.usuarioId);
+
+    const totalAsignadas = userTasks.length;
+    const completadas = userTasks.filter((t) => t.estado === 'Completada').length;
+
+    let aTiempo = 0;
+    let tarde = 0;
+
+    for (const t of userTasks) {
+      if (t.estado !== 'Completada') continue;
+      if (t.fechaLimite && t.completadaAt) {
+        if (new Date(t.completadaAt) <= new Date(t.fechaLimite)) {
+          aTiempo++;
+        } else {
+          tarde++;
+        }
+      } else {
+        // No deadline set — count as on time
+        aTiempo++;
+      }
+    }
+
+    const tasaCumplimiento = totalAsignadas > 0
+      ? Math.round((completadas / totalAsignadas) * 1000) / 10
+      : 0;
+
+    usuarios.push({
+      usuarioId: m.usuarioId,
+      nombre: user?.nombre || 'Desconocido',
+      totalAsignadas,
+      completadas,
+      aTiempo,
+      tarde,
+      tasaCumplimiento,
+    });
+  }
+
+  return { hogarId, usuarios };
 }

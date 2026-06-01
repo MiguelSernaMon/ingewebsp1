@@ -7,6 +7,7 @@ export default function TaskForm({ initialData, members, onSubmit, loading }) {
   const [categoria, setCategoria] = useState("");
   const [fechaLimite, setFechaLimite] = useState("");
   const [asignadoAId, setAsignadoAId] = useState("");
+  const [prioridad, setPrioridad] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -20,6 +21,7 @@ export default function TaskForm({ initialData, members, onSubmit, loading }) {
           : ""
       );
       setAsignadoAId(initialData.asignadoA?.usuarioId || initialData.asignadoAId || "");
+      setPrioridad(initialData.prioridad || "");
     }
   }, [initialData]);
 
@@ -43,6 +45,7 @@ export default function TaskForm({ initialData, members, onSubmit, loading }) {
       titulo: titulo.trim(),
       descripcion: descripcion.trim() || undefined,
       categoria: categoria.trim() || undefined,
+      prioridad: prioridad || undefined,
       fechaLimite: fechaLimite ? new Date(fechaLimite).toISOString() : undefined,
       asignadoAId: asignadoAId ? Number(asignadoAId) : undefined,
     };
@@ -92,6 +95,23 @@ export default function TaskForm({ initialData, members, onSubmit, loading }) {
         minLength={1}
         placeholder="Ej: Cocina, Limpieza, Jardín"
       />
+
+      <div>
+        <label htmlFor="prioridad" className="block text-lg font-black mb-1 uppercase">
+          Prioridad
+        </label>
+        <select
+          id="prioridad"
+          value={prioridad}
+          onChange={(e) => setPrioridad(e.target.value)}
+          className="w-full border-4 border-black p-3 text-lg font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:bg-gray-100 bg-white"
+        >
+          <option value="">Sin prioridad</option>
+          <option value="Alta">🔴 Alta</option>
+          <option value="Media">🟡 Media</option>
+          <option value="Baja">🟢 Baja</option>
+        </select>
+      </div>
 
       <BrutalistInput
         label="Fecha Límite"

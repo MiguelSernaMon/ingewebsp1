@@ -8,7 +8,7 @@ import {
 } from "./mock";
 import { apiFetch } from "./api";
 
-const USE_MOCK = false;
+const USE_MOCK = import.meta.env.PROD;
 
 export const taskService = USE_MOCK
   ? {
